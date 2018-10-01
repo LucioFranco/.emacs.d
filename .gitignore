@@ -26,4 +26,6 @@
 /aria2c.session
 /oauth2.plstore
 /straight
+!/straight/versions/default.el
 /xkcd
+/.cache

@@ -229,6 +229,5 @@
 
 
 (use-package alchemist)
-  
-
-;;(message "Done loading configuration!")
+ 
+(message "Done loading configuration!")
