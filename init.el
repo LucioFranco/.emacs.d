@@ -47,6 +47,9 @@
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
 
+;; Display keystrokes in the echo area immediately
+(setq echo-keystrokes 1e-6)
+
 (if *is-a-mac*
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t)))
 
@@ -65,9 +68,15 @@
   :demand t)
 (dimmer-mode)
 
-(use-package ace-window
-  :bind ("C-u" . ace-window)
-  :config (setq aw-dispatch-always t))
+(use-package winum
+  :bind
+  ("C-x w 0" . select-window-0-or-10)
+  ("C-1" . winum-select-window-1)
+  ("C-2" . winum-select-window-2)
+  ("C-3" . winum-select-window-3))
+(winum-mode)
+
+(use-package all-the-icons)
 
 ;; -------
 
@@ -105,15 +114,13 @@
   :bind ("M-x" . counsel-M-x))
 
 (use-package ivy
-	     :config
-	     (setq ivy-use-virtual-buffers t
-		   ivy-count-format "%d/%d ")
-	     :demand t)
-
-(use-package counsel-projectile
+  :bind (("C-s" . 'swiper)
+	 ("C-r" . 'swiper)
+	 ("C-c C-r" . 'ivy-resume))
+  :config (setq ivy-use-virtual-buffers t
+		ivy-count-format "%d/%d ")
   :demand t)
-(counsel-projectile-mode)
-
+(ivy-mode 1)
 
 ;; -------
 
@@ -132,15 +139,96 @@
 (use-package projectile
   :bind-keymap ("C-c p" . projectile-command-map))
 
+(use-package counsel-projectile
+  :init
+  (counsel-projectile-mode)
+  :demand t)
+
 (setq projectile-project-search-path '("~/code"))
+
+;; Treemacs
+(use-package treemacs
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs              (if (executable-find "python") 3 0)
+          treemacs-deferred-git-apply-delay   0.5
+          treemacs-display-in-side-window     t
+          treemacs-file-event-delay           5000
+          treemacs-file-follow-delay          0.2
+          treemacs-follow-after-init          t
+          treemacs-follow-recenter-distance   0.1
+          treemacs-goto-tag-strategy          'refetch-index
+          treemacs-indentation                2
+          treemacs-indentation-string         " "
+          treemacs-is-never-other-window      t
+          treemacs-no-png-images              nil
+          treemacs-project-follow-cleanup     nil
+          treemacs-persist-file               (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-recenter-after-file-follow nil
+          treemacs-recenter-after-tag-follow  nil
+          treemacs-show-hidden-files          t
+          treemacs-silent-filewatch           nil
+          treemacs-silent-refresh             nil
+          treemacs-sorting                    'alphabetic-desc
+          treemacs-space-between-root-nodes   t
+          treemacs-tag-follow-cleanup         t
+          treemacs-tag-follow-delay           1.5
+          treemacs-width                      35)
+
+  (treemacs-follow-mode nil)
+  (treemacs-filewatch-mode t))
+
+  :bind
+  (:map global-map
+        ("C-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+  
+
+(use-package treemacs-projectile
+  :after treemacs projectile
+  :defer t)
+    
+
+
+;; Smartparens
+(use-package smartparens
+  :config
+
+  (require 'smartparens-config)
+  (smartparens-global-mode +1)
+  (show-smartparens-global-mode +1))
 
 ;; Magit
 (use-package magit
   :bind ("C-c g" . magit-status)
-  :demand t)
+  :demand t
+  :config (setq magit-completing-read-function 'ivy-completing-read))
 
 ;; Elixir/Erlang
-(use-package elixir-mode)
+(use-package elixir-mode
+;;:bind-keymap ("C-c" . elixir-mode-map))
+  :config
+  (add-hook 'elixir-mode-hook
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+  
+  (add-hook 'elixir-format-hook (lambda ()
+                                  (if (projectile-project-p)
+                                      (setq elixir-format-arguments
+                                            (list "--dot-formatter"
+                                                  (concat (locate-dominating-file buffer-file-name ".formatter.exs") ".formatter.exs")))
+                                    (setq elixir-format-arguments nil)))))
+
+
+
 (use-package alchemist)
+  
 
 ;;(message "Done loading configuration!")
