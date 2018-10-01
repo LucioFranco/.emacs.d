@@ -63,6 +63,11 @@
 
 (use-package dimmer
   :demand t)
+(dimmer-mode)
+
+(use-package ace-window
+  :bind ("C-u" . ace-window)
+  :config (setq aw-dispatch-always t))
 
 ;; -------
 
@@ -138,4 +143,4 @@
 (use-package elixir-mode)
 (use-package alchemist)
 
-(message "Done loading configuration!")
+;;(message "Done loading configuration!")
