@@ -39,8 +39,13 @@
 ;; --------
 
 ;; Window config
+;; Set frame to fullscre
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Hide menu, toolbar and the scrollbar
 (menu-bar-mode -1)
 (tool-bar-mode -1)
+(toggle-scroll-bar -1)
 
 (if *is-a-mac*
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t)))
@@ -62,18 +67,48 @@
 ;; -------
 
 ;; TOOD: add dashboard
-(defun dashboard-buffer ()
-  "Create a new empty buffer.
-New buffer will be named *dashboard*"
-  (interactive)
-  (let ((buf (generate-new-buffer "*dashboard*")))
-    (switch-to-buffer buf)
-    (funcall initial-major-mode)
-    (setq buffer-offer-save t)
-    buf))
+(use-package xkcd)
+;;(xkcd)
+
+;; (defun dashboard-buffer ()
+;;   "Create a new empty buffer.
+;; New buffer will be named *dashboard*"
+;;   (interactive)
+;;   (let ((buf (generate-new-buffer "*dashboard*")))
+;;     (switch-to-buffer buf)
+;;     (funcall initial-major-mode)
+;;     (setq buffer-offer-save t)
+;;     buf))
 
 (setq inhibit-startup-screen t)
-(setq initial-buffer-choice 'dashboard-buffer)
+;; (setq initial-buffer-choice "*xkcd*")
+
+;; -------
+
+;; Shell Variable config
+(use-package exec-path-from-shell
+  :demand t)
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+
+;; -------
+
+;; Ivy/Counsel config
+(use-package counsel
+  :demand t
+  :bind ("M-x" . counsel-M-x))
+
+(use-package ivy
+	     :config
+	     (setq ivy-use-virtual-buffers t
+		   ivy-count-format "%d/%d ")
+	     :demand t)
+
+(use-package counsel-projectile
+  :demand t)
+(counsel-projectile-mode)
+
 
 ;; -------
 
@@ -91,6 +126,8 @@ New buffer will be named *dashboard*"
 ;; Projectile
 (use-package projectile
   :bind-keymap ("C-c p" . projectile-command-map))
+
+(setq projectile-project-search-path '("~/code"))
 
 ;; Magit
 (use-package magit
