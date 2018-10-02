@@ -3,3 +3,4 @@
 ## Requirements
 
 - `git`
+- For markdown preview `brew install multimarkdown`

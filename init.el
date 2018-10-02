@@ -1,3 +1,8 @@
+;;; package --- My Personal Emacs config
+
+;;; Comentary:
+
+;;; Code:
 ;; Debug when errors happen
 (setq debug-on-error t)
 
@@ -74,16 +79,12 @@
   :demand t)
 (load-theme 'monokai t)
 
-(use-package dimmer
-  :demand t)
-(dimmer-mode)
-
 (use-package winum
   :bind
-  ("C-x w 0" . select-window-0-or-10)
+  (("C-x w 0" . select-window-0-or-10)
   ("C-1" . winum-select-window-1)
   ("C-2" . winum-select-window-2)
-  ("C-3" . winum-select-window-3))
+  ("C-3" . winum-select-window-3)))
 (winum-mode)
 
 (use-package all-the-icons)
@@ -222,6 +223,20 @@
   :demand t
   :config (setq magit-completing-read-function 'ivy-completing-read))
 
+;; Global minor mods
+(use-package company
+  :defer t
+  :init (global-company-mode)
+  :config
+  (setq company-idle-delay 0.1)
+  (setq company-tooltip-limit 10)
+  (setq company-minimum-prefix-length 2)
+  (setq company-tooltip-flip-when-above t))
+
+(use-package flycheck
+  :defer t
+  :init (global-flycheck-mode))
+
 ;; Elixir/Erlang
 (use-package elixir-mode
 ;;:bind-keymap ("C-c" . elixir-mode-map))
@@ -238,17 +253,31 @@
 
 
 
-(use-package alchemist)
+(use-package alchemist
+  :defer t
+  :after elixir
+  :init
+  (progn
+    (add-hook 'elixir-mode-hook 'alchemist-mode)
+    (setq alchemist-project-compile-when-needed t
+          alchemist-test-status-modeline nil))
+    ;; setup company backends
+;;    (add-to-list 'company-backends 'alchemist-company))
+  :config
+  (setq alchemist-key-command-prefix (kbd "C-c ,")))
+
+(use-package flycheck-mix
+;;  :commands (flycheck-mix-setup)
+  :init
+  (progn
+    (add-to-list 'safe-local-variable-values
+                 (cons 'elixir-enable-compilation-checking nil))
+    (add-to-list 'safe-local-variable-values
+                 (cons 'elixir-enable-compilation-checking t))
+    (add-hook 'elixir-mode-local-vars-hook
+              'spacemacs//elixir-enable-compilation-checking)))
 
 ;; Rust
-(use-package company
-  :defer t
-  :init (global-company-mode))
-
-(use-package flycheck
-  :defer t
-  :init (global-flycheck-mode))
-
 (use-package rust-mode
   :defer t
   :config
@@ -340,8 +369,39 @@
 	     :config
 	     (setq org-log-done t))
  
-(setq org-agenda-files (directory-files-recursively "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org" "\.org$"))
+(if *is-a-mac*
+    (setq org-agenda-files (directory-files-recursively "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org" "\.org$"))
+  (setq org-agenda-files (directory-files-recursively "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org" "\.org$")))
+
 
 (setq  org-toggle-tags-groups nil)
 
+;; Gist
+(use-package gist
+  :defer t)
+
+;; Terraform
+(use-package terraform-mode
+  :defer t
+  :init
+  (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
+
+(use-package company-terraform
+  :after terraform-mode
+  :defer t
+  :init
+  (add-hook 'terraform-mode-hook #'company-terraform-init))
+
+;; Markdown
+(use-package markdown-mode
+  :defer t
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
 (message "Done loading configuration!")
+
+(provide 'init)
+;;; init.el ends here
