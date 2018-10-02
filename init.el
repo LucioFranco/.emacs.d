@@ -36,11 +36,21 @@
 ;; https://github.com/jwiegley/use-package#notes-about-lazy-loading.
 (setq use-package-always-defer t)
 
+(defmacro use-feature (name &rest args)
+  "Like `use-package', but with `straight-use-package-by-default' disabled."
+  (declare (indent defun))
+  `(use-package ,name
+     :straight nil
+     ,@args))
+
 ;; --------
 
 ;; Window config
 ;; Set frame to fullscre
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+;; Disable alarms
+(setq ring-bell-function 'ignore)
 
 ;; Hide menu, toolbar and the scrollbar
 (menu-bar-mode -1)
@@ -229,5 +239,109 @@
 
 
 (use-package alchemist)
+
+;; Rust
+(use-package company
+  :defer t
+  :init (global-company-mode))
+
+(use-package flycheck
+  :defer t
+  :init (global-flycheck-mode))
+
+(use-package rust-mode
+  :defer t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+  (setq rust-format-on-save t))
+
+(use-package cargo
+  :defer t
+  :init
+  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+
+(use-package racer
+  :defer t
+  :init
+  (add-hook 'rust-mode-hook #'racer-mode)
+  (add-hook 'racer-mode-hook #'eldoc-mode)
+  (add-hook 'racer-mode-hook #'company-mode)
+  :config
+  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+  (setq company-tooltip-align-annotations t))
+
+(use-package flycheck-rust
+  :defer t
+  :init
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+(use-package flycheck-inline
+  :defer t
+  :init (flycheck-inline-mode))
+
+;; Org
+;;; Prevent Emacs-provided Org from being loaded
+
+;; The following is a temporary hack until straight.el supports
+;; building Org, see:
+;;
+;; * https://github.com/raxod502/straight.el/issues/211
+;; * https://github.com/raxod502/radian/issues/410
+;;
+;; There are three things missing from our version of Org: the
+;; functions `org-git-version' and `org-release', and the feature
+;; `org-version'. We provide all three of those ourself, therefore.
+
+;; Package `git' is a library providing convenience functions for
+;; running Git.
+(use-package git)
+
+(defun org-git-version ()
+  "The Git version of org-mode.
+  Inserted by installing org-mode or when a release is made."
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (git-run "describe"
+              "--match=release\*"
+              "--abbrev=6"
+              "HEAD"))))
+
+(defun org-release ()
+  "The release version of org-mode.
+  Inserted by installing org-mode or when a release is made."
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (string-remove-prefix
+      "release_"
+      (git-run "describe"
+               "--match=release\*"
+               "--abbrev=0"
+               "HEAD")))))
+
+(provide 'org-version)
+
+;; Our real configuration for Org comes much later. Doing this now
+;; means that if any packages that are installed in the meantime
+;; depend on Org, they will not accidentally cause the Emacs-provided
+;; (outdated and duplicated) version of Org to be loaded before the
+;; real one is registered.
+(straight-use-package 'org)
+
+(use-feature org
+	     :bind* (;; Add the global keybindings for accessing Org Agenda and
+		     ;; Org Capture that are recommended in the Org manual.
+		     ("C-c a" . org-agenda)
+		     ("C-c c" . org-capture)
+		     ("C-c l" . org-store-link))
+	     :config
+	     (setq org-log-done t))
  
+(setq org-agenda-files (directory-files-recursively "~/iCloudDrive/iCloud~com~appsonthemove~beorg/org" "\.org$"))
+
+(setq  org-toggle-tags-groups nil)
+
 (message "Done loading configuration!")
