@@ -52,7 +52,8 @@
 
 ;; Window config
 ;; Set frame to fullscre
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
+;; TODO: to be replaced by toggle-frame-maximized
 
 ;; Disable alarms
 (setq ring-bell-function 'ignore)
@@ -88,6 +89,16 @@
 (winum-mode)
 
 (use-package all-the-icons)
+
+;; Desktop saving
+(desktop-save-mode 1)
+(setq desktop-restore-eager 10)
+(setq desktop-save t)
+
+;; Shackle
+(use-package shackle)
+(shackle-mode)
+(setq shackle-default-rule '(:select t))
 
 ;; -------
 
@@ -227,11 +238,19 @@
 (use-package company
   :defer t
   :init (global-company-mode)
+  :bind (:map company-active-map
+	      ("<tab>" . company-complete-selection)
+	      ("TAB" . company-complete-selection)
+	      ("C-n" . company-select-next-or-abort)
+	      ("C-p" . company-select-previous-or-abort))
   :config
   (setq company-idle-delay 0.1)
   (setq company-tooltip-limit 10)
   (setq company-minimum-prefix-length 2)
   (setq company-tooltip-flip-when-above t))
+  ;; (define-key company-active-map (kbd "C-n") 'company-select-next-or-abort)
+  ;; (define-key company-active-map (kbd "C-p") 'company-select-previous-or-abort)
+  ;; (define-key company-active-map (kbd "TAB") #'company-complete-selection))
 
 (use-package flycheck
   :defer t
@@ -243,6 +262,8 @@
   :config
   (add-hook 'elixir-mode-hook
             (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+  (add-hook 'elixir-mode-hook #'smartparens-mode)
+  
   
   (add-hook 'elixir-format-hook (lambda ()
                                   (if (projectile-project-p)
@@ -258,7 +279,7 @@
   :after elixir
   :init
   (progn
-    (add-hook 'elixir-mode-hook 'alchemist-mode)
+    (add-hook 'elixir-mode-hook #'alchemist-mode)
     (setq alchemist-project-compile-when-needed t
           alchemist-test-status-modeline nil))
     ;; setup company backends
@@ -296,7 +317,7 @@
   (add-hook 'racer-mode-hook #'eldoc-mode)
   (add-hook 'racer-mode-hook #'company-mode)
   :config
-  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+  ;;(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
   (setq company-tooltip-align-annotations t))
 
 (use-package flycheck-rust
@@ -367,7 +388,13 @@
 		     ("C-c c" . org-capture)
 		     ("C-c l" . org-store-link))
 	     :config
-	     (setq org-log-done t))
+	     (setq org-log-done t)
+	     (setq org-agenda-window-setup 'current-window)
+	     (setq org-agenda-restore-windows-after-quit t))
+
+(use-package ivy-todo
+  :bind ("C-c t" . ivy-todo)
+  :commands ivy-todo)
  
 (if *is-a-mac*
     (setq org-agenda-files (directory-files-recursively "~/Library/Mobile Documents/iCloud~com~appsonthemove~beorg/Documents/org" "\.org$"))
