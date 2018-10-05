@@ -125,7 +125,6 @@
             ))
 
     (shackle-mode 1)))
-(shackle-mode)
 
 ;; -------
 
