@@ -85,7 +85,9 @@
   (("C-x w 0" . select-window-0-or-10)
   ("C-1" . winum-select-window-1)
   ("C-2" . winum-select-window-2)
-  ("C-3" . winum-select-window-3)))
+  ("C-3" . winum-select-window-3)
+  ("C-4" . winum-select-window-4)
+  ("C-5" . winum-select-window-5)))
 (winum-mode)
 
 (use-package all-the-icons)
@@ -128,31 +130,16 @@
 
 ;; -------
 
-;; TOOD: add dashboard
-(use-package xkcd)
-;;(xkcd)
-
-;; (defun dashboard-buffer ()
-;;   "Create a new empty buffer.
-;; New buffer will be named *dashboard*"
-;;   (interactive)
-;;   (let ((buf (generate-new-buffer "*dashboard*")))
-;;     (switch-to-buffer buf)
-;;     (funcall initial-major-mode)
-;;     (setq buffer-offer-save t)
-;;     buf))
-
-(setq inhibit-startup-screen t)
-;; (setq initial-buffer-choice "*xkcd*")
-
-;; -------
-
 ;; Shell Variable config
 (use-package exec-path-from-shell
   :demand t)
 
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
+
+(use-package xterm-color)
+
+(use-package multi-term)
 
 ;; -------
 
@@ -454,7 +441,30 @@
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown"))
 
+;; Java
+(use-package meghanada
+  :defer t)
+
+(add-hook 'java-mode-hook
+          (lambda ()
+            ;; meghanada-mode on
+            (meghanada-mode t)
+            (flycheck-mode +1)
+            (setq c-basic-offset 2)
+            ;; use code format
+            (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+(cond
+   ((eq system-type 'windows-nt)
+    (setq meghanada-java-path (expand-file-name "bin/java.exe" (getenv "JAVA_HOME")))
+    (setq meghanada-maven-path "mvn.cmd"))
+   (t
+    (setq meghanada-java-path "java")
+    (setq meghanada-maven-path "mvn")))
+
+(use-package groovy-mode
+  :defer t)
+
 (message "Done loading configuration!")
 
 (provide 'init)
-;;; init.el ends here
+;p;; init.el ends here
