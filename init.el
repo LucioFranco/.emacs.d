@@ -55,6 +55,13 @@
 ;; (add-to-list 'default-frame-alist '(fullscreen . maximized))
 ;; TODO: to be replaced by toggle-frame-maximized
 
+;; Set default font
+(set-face-attribute 'default nil
+                    :family "Source Code Pro"
+                    :height 130
+                    :weight 'normal
+                    :width 'normal)
+
 ;; Disable alarms
 (setq ring-bell-function 'ignore)
 
@@ -255,7 +262,9 @@
 	      ("<tab>" . company-complete-selection)
 	      ("TAB" . company-complete-selection)
 	      ("C-n" . company-select-next-or-abort)
-	      ("C-p" . company-select-previous-or-abort))
+	      ("C-p" . company-select-previous-or-abort)
+	      ("RET" . nil)
+	      ("<return>" . nil))
   :config
   (setq company-idle-delay 0.1)
   (setq company-tooltip-limit 10)
@@ -462,6 +471,10 @@
     (setq meghanada-maven-path "mvn")))
 
 (use-package groovy-mode
+  :defer t)
+
+;; Yaml
+(use-package yaml-mode
   :defer t)
 
 (message "Done loading configuration!")
