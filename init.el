@@ -4,7 +4,7 @@
 
 ;;; Code:
 ;; Debug when errors happen
-(setq debug-on-error t)
+(setq debug-on-error nil)
 
 (message "Loading configuration...")
 
@@ -48,6 +48,8 @@
      :straight nil
      ,@args))
 
+
+
 ;; --------
 
 ;; Window config
@@ -80,12 +82,29 @@
     (add-to-list 'default-frame-alist '(ns-appearance . dark)))
 
 ;; Display line numbers
-(global-display-line-numbers-mode)
+;;(global-display-line-numbers-mode)
+
+
+(use-package blackout
+  :straight (:host github :repo "raxod502/blackout")
+  :demand t)
+
+(blackout 'auto-revert-mode)
+(blackout 'eldoc-mode)
 
 ;; Theme
 (use-package monokai-theme
   :demand t)
-(load-theme 'monokai t)
+(use-package github-modern-theme
+  :defer t)
+
+(use-package zenburn-theme
+  :defer t)
+
+(load-theme 'zenburn t)
+
+
+(global-hl-line-mode +1)
 
 (use-package winum
   :bind
@@ -104,6 +123,13 @@
 (setq desktop-restore-eager 10)
 (setq desktop-save t)
 
+;; Function for killing all buffers
+(defun kill-other-buffers ()
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+       (delq (current-buffer)
+       (remove-if-not 'buffer-file-name (buffer-list)))))
 ;; Shackle
 (use-package shackle
   :config
@@ -161,7 +187,8 @@
 	 ("C-c C-r" . 'ivy-resume))
   :config (setq ivy-use-virtual-buffers t
 		ivy-count-format "%d/%d ")
-  :demand t)
+  :demand t
+  :blackout)
 (ivy-mode 1)
 
 ;; -------
@@ -179,7 +206,8 @@
 
 ;; Projectile
 (use-package projectile
-  :bind-keymap ("C-c p" . projectile-command-map))
+  :bind-keymap ("C-c p" . projectile-command-map)
+  :blackout)
 
 (use-package counsel-projectile
   :init
@@ -222,7 +250,8 @@
           treemacs-width                      35)
 
   (treemacs-follow-mode nil)
-  (treemacs-filewatch-mode t))
+  (treemacs-filewatch-mode t)
+  (treemacs-git-mode 'simple))
 
   :bind
   (:map global-map
@@ -237,8 +266,6 @@
 (use-package treemacs-projectile
   :after treemacs projectile
   :defer t)
-    
-
 
 ;; Smartparens
 (use-package smartparens
@@ -246,7 +273,8 @@
 
   (require 'smartparens-config)
   (smartparens-global-mode +1)
-  (show-smartparens-global-mode +1))
+  (show-smartparens-global-mode +1)
+  :blackout)
 
 ;; Magit
 (use-package magit
@@ -269,14 +297,16 @@
   (setq company-idle-delay 0.1)
   (setq company-tooltip-limit 10)
   (setq company-minimum-prefix-length 2)
-  (setq company-tooltip-flip-when-above t))
+  (setq company-tooltip-flip-when-above t)
+  :blackout t)
   ;; (define-key company-active-map (kbd "C-n") 'company-select-next-or-abort)
   ;; (define-key company-active-map (kbd "C-p") 'company-select-previous-or-abort)
   ;; (define-key company-active-map (kbd "TAB") #'company-complete-selection))
 
 (use-package flycheck
   :defer t
-  :init (global-flycheck-mode))
+  :init (global-flycheck-mode)
+  :blackout)
 
 ;; Elixir/Erlang
 (use-package elixir-mode
@@ -476,6 +506,12 @@
 ;; Yaml
 (use-package yaml-mode
   :defer t)
+
+;; Docker
+(use-package dockerfile-mode
+  :defer t)
+
+
 
 (message "Done loading configuration!")
 
