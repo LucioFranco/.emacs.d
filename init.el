@@ -204,6 +204,12 @@
 (setq auto-save-file-name-transforms
       `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
 
+;; Ediotor config
+(use-package editorconfig
+  :config
+  (editorconfig-mode 1)
+  :blackout)
+
 ;; Projectile
 (use-package projectile
   :bind-keymap ("C-c p" . projectile-command-map)
@@ -528,6 +534,17 @@
 (use-package dockerfile-mode
   :defer t)
 
+
+;; PHP
+
+(use-package php-mode
+  :defer t)
+
+(use-package web-mode
+  :defer t)
+
+(use-package vue-mode
+  :defer t)
 
 
 (message "Done loading configuration!")
