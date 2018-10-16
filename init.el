@@ -141,7 +141,7 @@
 
     (setq shackle-rules
           ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
-          '((compilation-mode              :select nil                                               )
+          '((compilation-mode              :select nil                        :same t                       )
             ("*undo-tree*"                                                    :size 0.25 :align right)
             ("*eshell*"                    :select t                          :other t               )
             ("*Shell Command Output*"      :select nil                                               )
@@ -215,6 +215,13 @@
   :demand t)
 
 (setq projectile-project-search-path '("~/code"))
+
+;; TODO highlight
+(use-package hl-todo
+  :defer t
+  :config
+  (progn (global-hl-todo-mode))
+  :blackout)
 
 ;; Treemacs
 (use-package treemacs
@@ -469,7 +476,8 @@
   :after terraform-mode
   :defer t
   :init
-  (add-hook 'terraform-mode-hook #'company-terraform-init))
+  (add-hook 'terraform-mode-hook #'company-terraform-init)
+  :blackout)
 
 ;; Markdown
 (use-package markdown-mode
@@ -481,14 +489,22 @@
   :init (setq markdown-command "multimarkdown"))
 
 ;; Java
+(use-package gradle-mode
+  :defer t
+  :blackout)
+
 (use-package meghanada
-  :defer t)
+  :defer t
+  :config
+    (setq meghanada-javac-xlint "-Xlint:all,-processing")
+    :blackout)
 
 (add-hook 'java-mode-hook
           (lambda ()
             ;; meghanada-mode on
             (meghanada-mode t)
             (flycheck-mode +1)
+	    (gradle-mode 1)
             (setq c-basic-offset 2)
             ;; use code format
             (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
@@ -502,6 +518,7 @@
 
 (use-package groovy-mode
   :defer t)
+
 
 ;; Yaml
 (use-package yaml-mode
