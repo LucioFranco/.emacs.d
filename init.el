@@ -155,8 +155,8 @@
             ("\\`\\*helm.*?\\*\\'"   :regexp t                                    :size 0.3  :align t    )
             ("*Calendar*"                  :select t                          :size 0.3  :align below)
             ("*info*"                      :select t   :inhibit-window-quit t                         :same t)
-            (magit-status-mode             :select t   :inhibit-window-quit t                         :same t)
-            (magit-log-mode                :select t   :inhibit-window-quit t                         :same t)
+            (magit-status-mode             :select t   :inhibit-window-quit f  :same f)
+            (magit-log-mode                :select t   :inhibit-window-quit f  :same f)
             ))
 
     (shackle-mode 1)))
@@ -312,13 +312,21 @@
   (setq company-minimum-prefix-length 2)
   (setq company-tooltip-flip-when-above t)
   :blackout t)
+
   ;; (define-key company-active-map (kbd "C-n") 'company-select-next-or-abort)
   ;; (define-key company-active-map (kbd "C-p") 'company-select-previous-or-abort)
   ;; (define-key company-active-map (kbd "TAB") #'company-complete-selection))
 
+(use-package company-flx
+  :defer t
+  :blackout)
+
+(with-eval-after-load 'company
+  (company-flx-mode +1))
+
 (use-package flycheck
   :defer t
-  :init (global-flycheck-mode)
+  ;;:init (global-flycheck-mode)
   :blackout)
 
 ;; Elixir/Erlang
@@ -375,24 +383,57 @@
   :init
   (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
-(use-package racer
+(use-package eglot
   :defer t
-  :init
-  (add-hook 'rust-mode-hook #'racer-mode)
-  (add-hook 'racer-mode-hook #'eldoc-mode)
-  (add-hook 'racer-mode-hook #'company-mode)
   :config
-  ;;(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-  (setq company-tooltip-align-annotations t))
+  (progn
+    (add-hook 'rust-mode-hook 'eglot-ensure))
+  :blackout)
 
-(use-package flycheck-rust
-  :defer t
+(use-package flymake
+  :defer t)
+
+(use-package flymake-diagnostic-at-point
+  :straight (:host github :repo "meqif/flymake-diagnostic-at-point")
+  :demand t
+;;  :after flymake
+  :config
+  (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode)
   :init
-  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+  (setq flymake-diagnostic-at-point-display-diagnostic-function 'flymake-diagnostic-at-point-display-popup))
 
-(use-package flycheck-inline
+
+
+;; (use-package racer
+;;   :defer t
+;;   :init
+;;   (add-hook 'rust-mode-hook #'racer-mode)
+;;   (add-hook 'racer-mode-hook #'eldoc-mode)
+;;   ;;(add-hook 'racer-mode-hook #'company-mode)
+;;   :config
+;;   ;;(define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+;;   (setq company-tooltip-align-annotations t))
+
+;; (use-package flycheck-rust
+;;   :defer t
+;;   :init
+;;   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+;; (use-package flycheck-inline
+;;   :defer t
+;;   :init (flycheck-inline-mode))
+
+(use-package glsl-mode
   :defer t
-  :init (flycheck-inline-mode))
+  :config
+  (progn
+    (add-to-list 'auto-mode-alist '("\\.glsl\\'" . glsl-mode))
+    (add-to-list 'auto-mode-alist '("\\.vert\\'" . glsl-mode))
+    (add-to-list 'auto-mode-alist '("\\.frag\\'" . glsl-mode))
+    (add-to-list 'auto-mode-alist '("\\.geom\\'" . glsl-mode))))
+
+(use-package protobuf-mode
+  :defer)
 
 ;; Org
 ;;; Prevent Emacs-provided Org from being loaded
@@ -546,6 +587,10 @@
 (use-package vue-mode
   :defer t)
 
+
+;; Direnv
+(use-package direnv
+  :defer t)
 
 (message "Done loading configuration!")
 
