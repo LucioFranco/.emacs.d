@@ -4,7 +4,7 @@
 
 ;;; Code:
 ;; Debug when errors happen
-(setq debug-on-error nil)
+(setq debug-on-error t)
 
 (message "Loading configuration...")
 
@@ -112,7 +112,6 @@
 
 (load-theme 'solarized-dark t)
 
-
 (global-hl-line-mode +1)
 
 (use-package winum
@@ -128,9 +127,9 @@
 (use-package all-the-icons)
 
 ;; Desktop saving
-(desktop-save-mode 1)
+(desktop-save-mode nil)
 (setq desktop-restore-eager 10)
-(setq desktop-save t)
+(setq desktop-save nil)
 
 ;; Function for killing all buffers
 (defun kill-other-buffers ()
@@ -144,20 +143,35 @@
   :config
   (progn
     (setq shackle-lighter "")
-    (setq shackle-select-reused-windows nil) ; default nil
+    (setq shackle-select-reused-windows t) ; default nil
     (setq shackle-default-alignment 'below) ; default below
     (setq shackle-default-size 0.4) ; default 0.5
-
     (setq shackle-rules
-          ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
-          '((compilation-mode :select nil :same t)
-            (magit-status-mode :select nil :same t)
+	  '((compilation-mode :noselect t :other f :align t)
+	    (magit-status-mode :select nil :same f)
             (magit-log-mode :select nil :same t)
-            ))
+	    ("\\*Cargo.*\\*" :regexp t :noselect t :other t :inhibit-window-quit t))
+	  )
+      ;; shackle-default-rule
+      ;; '(:noselect t :other t :inhibit-window-quit t)))
+  :init
+  (shackle-mode))
 
-    (shackle-mode 1)))
+    ;; (setq shackle-rules
+    ;;       ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
+    ;;       '((compilation-mode :select nil :same t)
+    ;; 	    (cargo-process :select t :other t)
+    ;; 	    ("\\*Async Shell.*\\*" :regexp t :ignore t)
+    ;; 	    ("\\*Cargo.*\\*" :regexp t :ignore t)
+
+;;         ))
 
 ;; -------
+
+(use-package eyebrowse
+  :init (eyebrowse-mode))
+
+
 
 ;; Shell Variable config
 (use-package exec-path-from-shell
@@ -221,8 +235,7 @@
 ;; TODO highlight
 (use-package hl-todo
   :defer t
-  :config
-  (progn (global-hl-todo-mode))
+  :init (global-hl-line-mode 1)
   :blackout)
 
 ;; Treemacs
@@ -327,13 +340,12 @@
 
 ;; Elixir/Erlang
 (use-package elixir-mode
-;;:bind-keymap ("C-c" . elixir-mode-map))
+  ;;:bind-keymap ("C-c" . elixir-mode-map))
   :config
   (add-hook 'elixir-mode-hook
             (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
   (add-hook 'elixir-mode-hook #'smartparens-mode)
-  
-  
+  (add-to-list 'elixir-mode-hook 'seancribbs/activate-alchemist-root-advice)
   (add-hook 'elixir-format-hook (lambda ()
                                   (if (projectile-project-p)
                                       (setq elixir-format-arguments
@@ -345,16 +357,30 @@
 
 (use-package alchemist
   :defer t
-  :after elixir
+  :bind (:map alchemist-mode-map
+	      ("C-c C-c C-t" . alchemist-mix-test)
+	      ("C-c C-c C-b" . alchemist-mix-compile)
+	      ("C-c C-c C-w" . alchemist-goto-list-symbol-definitions)
+	      ("M-w" . nil)) ;; Need this because for some reason alchemist wants to steal that bind :shrug:
   :init
   (progn
     (add-hook 'elixir-mode-hook #'alchemist-mode)
     (setq alchemist-project-compile-when-needed t
           alchemist-test-status-modeline nil))
-    ;; setup company backends
-;;    (add-to-list 'company-backends 'alchemist-company))
-  :config
-  (setq alchemist-key-command-prefix (kbd "C-c ,")))
+  ;; setup company backends
+  ;; (add-to-list 'company-backends 'alchemist-company))
+  :blackout t)
+
+
+(defadvice alchemist-project-root (around seancribbs/alchemist-project-root activate)
+  (let ((alchemist-project-mix-project-indicator ".git"))
+    ad-do-it))
+
+(defun seancribbs/activate-alchemist-root-advice ()
+  "Activates advice to override alchemist's root-finding logic"
+  (ad-activate 'alchemist-project-root))
+
+
 
 (use-package flycheck-mix
 ;;  :commands (flycheck-mix-setup)
@@ -586,23 +612,11 @@
 
 ;; Direnv
 (use-package direnv
-  :defer t)
+  :defer t
+  :config (setq direnv-always-show-summary nil))
+(direnv-mode 1)
 
 (message "Done loading configuration!")
 
 (provide 'init)
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("45b84ddcc65bdf01d9cc76061a9473e3291d82c9209eac0694fbbb81c57b92fd" "63e6337545edc4f404ea04a756d369e36e9974b5e7b85cce7cbc246552647516" "2925ed246fb757da0e8784ecf03b9523bccd8b7996464e587b081037e0e98001" "c1c0899fe31d75e82286d64c14d3a858636fc759cd3c78139c3038f7330041db" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" default))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
