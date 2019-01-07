@@ -4,7 +4,7 @@
 
 ;;; Code:
 ;; Debug when errors happen
-(setq debug-on-error t)
+(setq debug-on-error nil)
 
 (message "Loading configuration...")
 
@@ -127,9 +127,9 @@
 (use-package all-the-icons)
 
 ;; Desktop saving
-(desktop-save-mode nil)
-(setq desktop-restore-eager 10)
-(setq desktop-save nil)
+;; (desktop-save-mode nil)
+;; (setq desktop-restore-eager 10)
+;; (setq desktop-save nil)
 
 ;; Function for killing all buffers
 (defun kill-other-buffers ()
@@ -150,28 +150,17 @@
 	  '((compilation-mode :noselect t :other f :align t)
 	    (magit-status-mode :select nil :same f)
             (magit-log-mode :select nil :same t)
-	    ("\\*Cargo.*\\*" :regexp t :noselect t :other t :inhibit-window-quit t))
-	  )
+	    ("\\*Cargo.*\\*" :regexp t :noselect t :other t :inhibit-window-quit t)
+	  )))
       ;; shackle-default-rule
       ;; '(:noselect t :other t :inhibit-window-quit t)))
   :init
   (shackle-mode))
 
-    ;; (setq shackle-rules
-    ;;       ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
-    ;;       '((compilation-mode :select nil :same t)
-    ;; 	    (cargo-process :select t :other t)
-    ;; 	    ("\\*Async Shell.*\\*" :regexp t :ignore t)
-    ;; 	    ("\\*Cargo.*\\*" :regexp t :ignore t)
-
-;;         ))
-
 ;; -------
 
-(use-package eyebrowse
-  :init (eyebrowse-mode))
-
-
+;; (use-package eyebrowse
+;;   :init (eyebrowse-mode))
 
 ;; Shell Variable config
 (use-package exec-path-from-shell
@@ -620,3 +609,16 @@
 
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
