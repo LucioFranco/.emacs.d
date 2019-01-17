@@ -143,19 +143,36 @@
   :config
   (progn
     (setq shackle-lighter "")
-    (setq shackle-select-reused-windows t) ; default nil
+    (setq shackle-select-reused-windows nil) ; default nil
     (setq shackle-default-alignment 'below) ; default below
     (setq shackle-default-size 0.4) ; default 0.5
     (setq shackle-rules
-	  '((compilation-mode :noselect t :other f :align t)
-	    (magit-status-mode :select nil :same f)
+	  '(;;(compilation-mode :noselect t)
+	    (magit-status-mode :noselect t :same t)
+	    (magit-diff-mode :select nil :same nil :other t :inhibit-window-quit t)
             (magit-log-mode :select nil :same t)
-	    ("\\*Cargo.*\\*" :regexp t :noselect t :other t :inhibit-window-quit t)
-	  )))
-      ;; shackle-default-rule
-      ;; '(:noselect t :other t :inhibit-window-quit t)))
+	    ("\\*Cargo.*\\*" :regexp t :select t :other t :inhibit-window-quit t :reuse t)
+	    ("\\*alchemist.*\\*" :regexp t :noselect t :other t :inhibit-window-quit t :reuse t)
+	  ))
+      )
   :init
   (shackle-mode))
+
+;; Custom display call back to allow the compile-goto-error
+;; to open in another window that is already open instead of
+;; opening a new pop up window.
+;;
+;; Reference: https://emacs.stackexchange.com/questions/19080/is-there-a-better-way-to-override-opening-window-in-compilation-goto-locus?noredirect=1&lq=1
+(defvar display-buffer-same-window-commands
+  '(occur-mode-goto-occurrence compile-goto-error))
+
+(add-to-list 'display-buffer-alist
+             '((lambda (&rest _)
+                 (memq this-command display-buffer-same-window-commands))
+               (display-buffer-reuse-window
+		;; This will select some other window
+                display-buffer-use-some-window) 
+               (inhibit-same-window . nil)))
 
 ;; -------
 
@@ -293,6 +310,10 @@
   :demand t
   :config (setq magit-completing-read-function 'ivy-completing-read))
 
+;; (use-package forge
+;;   :demand t
+;;   :blackout t)
+
 ;; Global minor mods
 (use-package company
   :defer t
@@ -348,6 +369,7 @@
   :defer t
   :bind (:map alchemist-mode-map
 	      ("C-c C-c C-t" . alchemist-mix-test)
+	      ("C-c C-c C-f" . alchemist-mix-test-this-buffer)
 	      ("C-c C-c C-b" . alchemist-mix-compile)
 	      ("C-c C-c C-w" . alchemist-goto-list-symbol-definitions)
 	      ("M-w" . nil)) ;; Need this because for some reason alchemist wants to steal that bind :shrug:
@@ -387,7 +409,7 @@
   :defer t
   :config
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
-  (setq rust-format-on-save t))
+  (setq rust-format-on-save nil))
 
 (use-package cargo
   :defer t
@@ -615,7 +637,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+   '("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
