@@ -4,7 +4,7 @@
 
 ;;; Code:
 ;; Debug when errors happen
-(setq debug-on-error nil)
+(setq debug-on-error t)
 
 (message "Loading configuration...")
 
@@ -48,6 +48,9 @@
      :straight nil
      ,@args))
 
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
 
 
 ;; --------
@@ -79,7 +82,7 @@
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t)))
 
 (if *is-a-mac*
-    (add-to-list 'default-frame-alist '(ns-appearance . dark)))
+    (add-to-list 'default-frame-alist '(ns-appearance . light)))
 
 ;; Display line numbers
 ;;(global-display-line-numbers-mode)
@@ -110,18 +113,23 @@
 ;; (use-package alect-light
 ;;   :defer t)
 
-(load-theme 'solarized-dark t)
+(load-theme 'solarized-light t)
 
 (global-hl-line-mode +1)
 
 (use-package winum
   :bind
-  (("C-x w 0" . select-window-0-or-10)
-  ("C-1" . winum-select-window-1)
-  ("C-2" . winum-select-window-2)
-  ("C-3" . winum-select-window-3)
-  ("C-4" . winum-select-window-4)
-  ("C-5" . winum-select-window-5)))
+  (
+   ("C-x w 0" . select-window-0-or-10)
+   ("C-1" . winum-select-window-1)
+   ("C-2" . winum-select-window-2)
+   ("C-3" . winum-select-window-3)
+   ("C-4" . winum-select-window-4)
+   ("C-5" . winum-select-window-5)
+   ("C-5" . winum-select-window-5)
+   ("C-6" . winum-select-window-6)
+   ("C-7" . winum-select-window-7)
+   ))
 (winum-mode)
 
 (use-package all-the-icons)
@@ -157,7 +165,6 @@
       )
   :init
   (shackle-mode))
-
 ;; Custom display call back to allow the compile-goto-error
 ;; to open in another window that is already open instead of
 ;; opening a new pop up window.
@@ -239,10 +246,16 @@
 (setq projectile-project-search-path '("~/code"))
 
 ;; TODO highlight
-(use-package hl-todo
-  :defer t
-  :init (global-hl-line-mode 1)
-  :blackout)
+;; (use-package hl-todo
+;;   :defer t
+;;   :init (global-hl-line-mode 1)
+;;   :blackout)
+
+(use-package button-lock
+  :init (global-button-lock-mode 1))
+(use-package fixmee
+  :after 'button-lock
+  :init (global-fixmee-mode 1))
 
 ;; Treemacs
 (use-package treemacs
@@ -312,6 +325,11 @@
 
 ;; (use-package forge
 ;;   :demand t
+;;   :blackout t)
+
+;; (use-package forge
+;;   :straight (:host github :repo "magit/forge")
+;;   :after magit
 ;;   :blackout t)
 
 ;; Global minor mods
@@ -409,12 +427,17 @@
   :defer t
   :config
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
-  (setq rust-format-on-save nil))
+  (setq rust-format-on-save t))
 
 (use-package cargo
   :defer t
   :init
-  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+  (add-hook 'rust-mode-hook 'cargo-minor-mode)
+  (defun cargo-process-check-all ()
+  "Run the Cargo check command. This applies --all --all-features --all-targets"
+  (interactive)
+  (cargo-process--start "Check all" "check  --all --all-features --all-targets"))
+  (define-key cargo-minor-mode-map (kbd "C-c C-c C-l") 'cargo-process-check-all))
 
 (use-package eglot
   :defer t
@@ -434,6 +457,9 @@
   (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode)
   :init
   (setq flymake-diagnostic-at-point-display-diagnostic-function 'flymake-diagnostic-at-point-display-popup))
+
+(use-package toml-mode
+  :defer t)
 
 
 
@@ -548,9 +574,9 @@
 
 ;; Terraform
 (use-package terraform-mode
-  :defer t
-  :init
-  (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
+  :defer t)
+  ;; :init
+  ;; (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
 
 (use-package company-terraform
   :after terraform-mode
