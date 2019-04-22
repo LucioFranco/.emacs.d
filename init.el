@@ -434,9 +434,9 @@
   :init
   (add-hook 'rust-mode-hook 'cargo-minor-mode)
   (defun cargo-process-check-all ()
-  "Run the Cargo check command. This applies --all --all-features --all-targets"
-  (interactive)
-  (cargo-process--start "Check all" "check  --all --all-features --all-targets"))
+    "Run the Cargo check command. This applies --all --all-features --all-targets"
+    (interactive)
+    (cargo-process--start "Check all" "check  --all --all-features --all-targets"))
   (define-key cargo-minor-mode-map (kbd "C-c C-c C-l") 'cargo-process-check-all))
 
 (use-package eglot
