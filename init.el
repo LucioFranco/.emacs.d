@@ -321,7 +321,10 @@
 (use-package magit
   :bind ("C-c g" . magit-status)
   :demand t
-  :config (setq magit-completing-read-function 'ivy-completing-read))
+  :config
+  (setq magit-completing-read-function 'ivy-completing-read)
+  (setq magit-commit-signoff t)
+  )
 
 ;; (use-package forge
 ;;   :demand t
@@ -433,11 +436,12 @@
   :defer t
   :init
   (add-hook 'rust-mode-hook 'cargo-minor-mode)
+  :config
+  (define-key cargo-minor-mode-map (kbd "C-c C-c C-l") 'cargo-process-check-all)
   (defun cargo-process-check-all ()
     "Run the Cargo check command. This applies --all --all-features --all-targets"
     (interactive)
-    (cargo-process--start "Check all" "check  --all --all-features --all-targets"))
-  (define-key cargo-minor-mode-map (kbd "C-c C-c C-l") 'cargo-process-check-all))
+    (cargo-process--start "Check all" "check  --all --all-features --all-targets")))
 
 (use-package eglot
   :defer t
@@ -655,6 +659,8 @@
 
 (message "Done loading configuration!")
 
+(toggle-frame-maximized)
+
 (provide 'init)
 ;;; init.el ends here
 (custom-set-variables
@@ -663,7 +669,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
+   '("2925ed246fb757da0e8784ecf03b9523bccd8b7996464e587b081037e0e98001" "45b84ddcc65bdf01d9cc76061a9473e3291d82c9209eac0694fbbb81c57b92fd" "ef0d2cd0b5ecebd6794a2012ffa08393e536b33e3e377ac2930bf5d7304dcb21" "8aebf25556399b58091e533e455dd50a6a9cba958cc4ebb0aab175863c25b9a4" "d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default))
+ '(smartparens-global-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
